@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b4f9c">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>دفتر حساب - تعمیرات موبایل علی</title>
+<style>
+:root{--bg:#f1f5fb;--card:#fff;--ink:#12233b;--mute:#6b7a90;--blue:#0b4f9c;--blue2:#e3eefb;--debt:#c0392b;--pay:#1e8e5a;--line:#dbe4f0}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1522;--card:#17212f;--ink:#e8eef7;--mute:#92a1b8;--blue:#5aa2f0;--blue2:#1b2b42;--debt:#ff7b6b;--pay:#4fd08e;--line:#26354a}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Tahoma,"Noto Sans Arabic","Segoe UI",sans-serif;line-height:1.6;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:560px;margin:0 auto;padding:16px}
+h1{font-size:18px;margin:0}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.sum{background:var(--blue);color:#fff;border-radius:16px;padding:18px 20px;margin-bottom:14px}
+.sum small{opacity:.85;font-size:13px}
+.sum b{display:block;font-size:30px;line-height:1.3;margin-top:2px}
+.sum span{font-size:14px;opacity:.9}
+input,select,button{font:inherit;color:inherit}
+input,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);margin-bottom:8px}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+button{border:0;border-radius:10px;padding:11px 16px;background:var(--blue);color:#fff;cursor:pointer}
+button.ghost{background:var(--blue2);color:var(--blue)}
+button.del{background:none;color:var(--mute);padding:4px 8px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.cust{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer}
+.cust .n{font-weight:bold}
+.cust .p{font-size:13px;color:var(--mute)}
+.bal{font-weight:bold;white-space:nowrap}
+.bal.d{color:var(--debt)}.bal.p{color:var(--pay)}.bal.z{color:var(--mute)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+.ent{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.ent:last-child{border:0}
+.ent .m{font-size:13px;color:var(--mute)}
+.empty{text-align:center;color:var(--mute);padding:24px 8px}
+.hide{display:none}
+.rem{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.rem:last-child{border:0}
+.rem .m{font-size:13px;color:var(--mute)}
+.rem.late .m,.rem.now .m{color:var(--debt);font-weight:bold}
+.rem button{padding:6px 12px;font-size:13px}
+.panel h2{font-size:15px;margin:0 0 8px}
+.tabs{display:flex;gap:8px;margin-bottom:8px}
+.tabs button{flex:1;background:var(--blue2);color:var(--blue)}
+.tabs button.on.debt{background:var(--debt);color:#fff}
+.tabs button.on.pay{background:var(--pay);color:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<section id="home">
+  <div class="top"><h1>دفتر حساب تعمیرات موبایل علی</h1><button class="ghost" id="backup">پشتیبان</button></div>
+  <div class="sum"><small>جمع طلب شما از مشتری‌ها</small><b id="total">۰</b><span>تومان</span></div>
+  <div id="rems"></div>
+  <input id="q" placeholder="جستجوی نام یا شماره مشتری">
+  <div id="list"></div>
+  <div class="panel">
+    <input id="nn" placeholder="نام مشتری جدید">
+    <input id="np" placeholder="شماره تلفن (اختیاری)" inputmode="tel">
+    <button id="add" style="width:100%">افزودن مشتری</button>
+  </div>
+</section>
+
+<section id="detail" class="hide">
+  <div class="top"><button class="ghost" id="back">بازگشت</button><button class="del" id="rmc">حذف مشتری</button></div>
+  <div class="panel">
+    <h1 id="dn"></h1>
+    <div class="p" id="dp" style="color:var(--mute);font-size:13px"></div>
+    <div class="bal" id="db" style="font-size:24px;margin-top:6px"></div>
+  </div>
+  <div class="panel">
+    <div class="tabs"><button id="tdebt" class="on debt">ثبت بدهی (تعمیر/خرید)</button><button id="tpay">ثبت پرداخت</button></div>
+    <input id="amt" placeholder="مبلغ (تومان)" inputmode="numeric">
+    <input id="note" placeholder="توضیح، مثلاً تعویض ال‌سی‌دی A12">
+    <button id="save" style="width:100%">ذخیره</button>
+  </div>
+  <div class="panel">
+    <h2>یادآور برای خودم</h2>
+    <input id="rt" placeholder="مثلاً زنگ بزنم برای وصول طلب">
+    <div class="tabs" id="rq"><button data-d="1">فردا</button><button data-d="3">۳ روز دیگر</button><button data-d="7">هفته دیگر</button></div>
+    <input id="rd" type="date">
+    <button id="radd" style="width:100%">ثبت یادآور</button>
+  </div>
+  <div class="panel" id="ents"></div>
+</section>
+
+</div>
+<script>
+(function(){
+var KEY='mobile-ali-ledger', S={customers:[],reminders:[]}, cur=null, type='debt';
+try{var r=localStorage.getItem(KEY);if(r)S=JSON.parse(r)}catch(e){}
+if(!S.reminders)S.reminders=[];
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function $(i){return document.getElementById(i)}
+var fa='۰۱۲۳۴۵۶۷۸۹';
+function num(n){return String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g,',').replace(/\d/g,function(d){return fa[d]})}
+function parse(s){var m='۰۱۲۳۴۵۶۷۸۹',a='٠١٢٣٤٥٦٧٨٩';s=String(s).replace(/[۰-۹]/g,function(c){return m.indexOf(c)}).replace(/[٠-٩]/g,function(c){return a.indexOf(c)}).replace(/[^\d]/g,'');return parseInt(s,10)||0}
+function today(){try{return new Date().toLocaleDateString('fa-IR-u-ca-persian',{year:'numeric',month:'long',day:'numeric'})}catch(e){return new Date().toLocaleDateString()}}
+function bal(c){return c.entries.reduce(function(s,e){return s+(e.type==='debt'?e.amount:-e.amount)},0)}
+function balHtml(b){return b>0?'<span class="bal d">بدهکار: '+num(b)+' تومان</span>':b<0?'<span class="bal p">بستانکار: '+num(b)+' تومان</span>':'<span class="bal z">تسویه</span>'}
+function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+
+function iso(d){var m=d.getMonth()+1,x=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(x<10?'0':'')+x}
+function fd(i){try{return new Date(i+'T00:00:00').toLocaleDateString('fa-IR-u-ca-persian',{month:'long',day:'numeric'})}catch(e){return i}}
+function rems(){
+  var t=iso(new Date()),L=S.reminders.filter(function(r){return !r.done}).sort(function(a,b){return a.due<b.due?-1:1}),h='',n=0;
+  L.forEach(function(r){
+    var c=S.customers.filter(function(x){return x.id===r.cid})[0],cls=r.due<t?'late':r.due===t?'now':'';
+    if(cls)n++;
+    h+='<div class="rem '+cls+'"><div><div>'+esc(r.text)+'</div><div class="m">'+(c?esc(c.name)+' - ':'')+(r.due<t?'عقب افتاده، ':r.due===t?'امروز، ':'')+fd(r.due)+'</div></div><button class="ghost" data-r="'+r.id+'">انجام شد</button></div>'
+  });
+  $('rems').innerHTML=L.length?'<div class="panel"><h2>یادآورهای من'+(n?' ('+num(n)+' مورد برای امروز یا عقب‌افتاده)':'')+'</h2>'+h+'</div>':'';
+}
+function home(){
+  rems();
+  var q=$('q').value.trim(), t=0, h='';
+  S.customers.forEach(function(c){var b=bal(c);if(b>0)t+=b});
+  $('total').textContent=num(t);
+  var L=S.customers.filter(function(c){return !q||c.name.indexOf(q)>-1||(c.phone||'').indexOf(q)>-1})
+    .sort(function(a,b){return bal(b)-bal(a)});
+  L.forEach(function(c){h+='<div class="cust" data-id="'+c.id+'"><div><div class="n">'+esc(c.name)+'</div><div class="p">'+esc(c.phone||'')+'</div></div>'+balHtml(bal(c))+'</div>'});
+  $('list').innerHTML=h||'<div class="empty">'+(S.customers.length?'مشتری‌ای پیدا نشد.':'هنوز مشتری ثبت نشده. از پایین صفحه اولین مشتری را اضافه کنید.')+'</div>';
+}
+function detail(){
+  var c=S.customers.filter(function(x){return x.id===cur})[0];
+  if(!c){show('home');return}
+  $('dn').textContent=c.name;$('dp').textContent=c.phone||'';$('db').innerHTML=balHtml(bal(c));
+  var h='';
+  c.entries.slice().reverse().forEach(function(e){
+    h+='<div class="ent"><div><div>'+(e.type==='debt'?'بدهی':'پرداخت')+(e.note?' - '+esc(e.note):'')+'</div><div class="m">'+esc(e.date)+'</div></div><div style="text-align:left"><span class="bal '+(e.type==='debt'?'d':'p')+'">'+num(e.amount)+'</span><button class="del" data-e="'+e.id+'">حذف</button></div></div>'
+  });
+  $('ents').innerHTML=h||'<div class="empty">هنوز تراکنشی ثبت نشده.</div>';
+}
+function show(w){$('home').classList.toggle('hide',w!=='home');$('detail').classList.toggle('hide',w!=='detail');if(w==='home')home();else detail();window.scrollTo(0,0)}
+function setType(t){type=t;$('tdebt').className=t==='debt'?'on debt':'';$('tpay').className=t==='pay'?'on pay':''}
+
+$('q').oninput=home;
+$('add').onclick=function(){
+  var n=$('nn').value.trim();if(!n){$('nn').focus();return}
+  S.customers.push({id:id(),name:n,phone:$('np').value.trim(),entries:[]});
+  $('nn').value='';$('np').value='';save();home();
+};
+$('list').onclick=function(e){var el=e.target.closest('.cust');if(el){cur=el.getAttribute('data-id');show('detail')}};
+$('back').onclick=function(){show('home')};
+$('tdebt').onclick=function(){setType('debt')};
+$('tpay').onclick=function(){setType('pay')};
+$('save').onclick=function(){
+  var a=parse($('amt').value);if(!a){$('amt').focus();return}
+  var c=S.customers.filter(function(x){return x.id===cur})[0];
+  c.entries.push({id:id(),type:type,amount:a,note:$('note').value.trim(),date:today()});
+  $('amt').value='';$('note').value='';save();detail();
+};
+$('ents').onclick=function(e){
+  var k=e.target.getAttribute('data-e');if(!k||!confirm('این تراکنش حذف شود؟'))return;
+  var c=S.customers.filter(function(x){return x.id===cur})[0];
+  c.entries=c.entries.filter(function(x){return x.id!==k});save();detail();
+};
+$('rmc').onclick=function(){
+  if(!confirm('این مشتری و همه حساب‌هایش حذف شود؟'))return;
+  S.customers=S.customers.filter(function(x){return x.id!==cur});save();show('home');
+};
+$('rq').onclick=function(e){var d=e.target.getAttribute('data-d');if(!d)return;var x=new Date();x.setDate(x.getDate()+parseInt(d,10));$('rd').value=iso(x)};
+$('radd').onclick=function(){
+  var t=$('rt').value.trim(),d=$('rd').value;
+  if(!t){$('rt').focus();return}
+  if(!d){$('rd').focus();return}
+  S.reminders.push({id:id(),cid:cur,text:t,due:d,done:false});
+  $('rt').value='';$('rd').value='';save();alert('یادآور ثبت شد. در صفحه اول بالای لیست مشتری‌ها دیده می‌شود.');
+};
+$('rems').onclick=function(e){var k=e.target.getAttribute('data-r');if(!k)return;S.reminders.forEach(function(r){if(r.id===k)r.done=true});save();rems()};
+$('backup').onclick=function(){
+  var j=JSON.stringify(S);
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(j).then(function(){alert('نسخه پشتیبان کپی شد. آن را در جایی امن (مثلاً پیام‌های ذخیره‌شده) نگه دارید.')},function(){prompt('این متن را کپی کنید:',j)})}
+  else prompt('این متن را کپی کنید:',j);
+};
+home();
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
+})();
+</script>
+</body>
+</html>
